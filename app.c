@@ -1,6 +1,7 @@
 #include "sim.h"
 
 // -------META PARAMS-------
+
 const int RADIUS = 30;
 const int STEP = 3;
 
