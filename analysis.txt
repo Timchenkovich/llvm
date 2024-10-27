@@ -1,0 +1,53 @@
+LENGTH: 2
+br->icmp: 1185678
+icmp->add: 1184283
+add->mul: 7758
+call->add: 5850
+mul->add: 4725
+sub->mul: 2151
+call->sub: 1413
+add->shl: 675
+add->add: 675
+sub->add: 333
+shl->sub: 333
+sub->shl: 63
+or->icmp: 36
+select->sub: 18
+mul->select: 18
+select->or: 18
+and->call: 2
+srem->call: 2
+select->icmp: 2
+icmp->and: 2
+
+LENGTH: 3
+br->icmp->add: 1184265
+call->add->mul: 9153
+add->mul->add: 4725
+call->sub->mul: 2151
+sub->mul->add: 2025
+add->add->shl: 342
+shl->sub->add: 333
+add->shl->sub: 333
+select->or->icmp: 36
+add->mul->select: 18
+mul->select->sub: 18
+or->icmp->add: 18
+mul->select->or: 18
+select->icmp->and: 2
+icmp->and->call: 2
+
+LENGTH: 4
+call->add->mul->add: 5400
+call->sub->mul->add: 2025
+add->shl->sub->add: 333
+mul->select->or->icmp: 36
+select->or->icmp->add: 18
+add->mul->select->sub: 18
+add->mul->select->or: 18
+select->icmp->and->call: 2
+
+LENGTH: 5
+add->mul->select->or->icmp: 36
+mul->select->or->icmp->add: 18
+
