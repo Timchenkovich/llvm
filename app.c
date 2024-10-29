@@ -1,4 +1,4 @@
-#include "sim.h"
+#include "sim/sim.h"
 
 void fill_background(int background_color) {
   for (int i = 0; i < SIM_X_SIZE; ++i) {

@@ -1,9 +1,8 @@
-#include "sim.h"
+#include "sim/sim.h"
 
-int main(void)
-{
-    simInit();
-    app();
-    simExit();
-    return 0;
+int main(void) {
+  simInit();
+  app();
+  simExit();
+  return 0;
 }
