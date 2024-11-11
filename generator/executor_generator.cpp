@@ -78,7 +78,7 @@ struct generator {
     println("LLVMContext context;");
     println(
         "std::unique_ptr<Module> module = "
-        "std::make_unique<Module>(\"executor.cpp\", "
+        "std::make_unique<Module>(\"generated\", "
         "context);");
     println("IRBuilder<> builder(context);");
     println("Type* voidType = Type::getVoidTy(context);");

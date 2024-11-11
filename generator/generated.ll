@@ -1,5 +1,5 @@
-; ModuleID = 'executor.cpp'
-source_filename = "executor.cpp"
+; ModuleID = 'generated'
+source_filename = "generated"
 
 declare void @simPutPixel(i32, i32, i32)
 

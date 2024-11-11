@@ -1,8 +1,4 @@
-<<<<<<< HEAD:app/app.c
 #include "../sim/sim.h"
-=======
-#include "sim/sim.h"
->>>>>>> c00c5d01e7a78a8cfaa5879e765936f8b83cd025:app.c
 
 void fill_background(int background_color) {
   for (int i = 0; i < SIM_X_SIZE; ++i) {
