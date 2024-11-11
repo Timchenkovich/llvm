@@ -1,11 +1,3 @@
-#include <llvm-19/llvm/ADT/ArrayRef.h>
-#include <llvm-19/llvm/IR/BasicBlock.h>
-#include <llvm-19/llvm/IR/DerivedTypes.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -17,8 +9,6 @@
 #include <numeric>
 #include <regex>
 #include <string>
-
-using namespace llvm;
 
 namespace {
 const auto NUM = std::regex("-?\\d+");
