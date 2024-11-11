@@ -1,12 +1,11 @@
+#include <algorithm>
+#include <array>
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <string>
-
-#include <algorithm>
-#include <array>
 #include <memory>
 #include <numeric>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>

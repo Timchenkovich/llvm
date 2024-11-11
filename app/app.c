@@ -1,4 +1,4 @@
-#include "sim.h"
+#include "../sim/sim.h"
 
 void fill_background(int background_color) {
   for (int i = 0; i < SIM_X_SIZE; ++i) {
@@ -50,7 +50,6 @@ void draw_half_circle(int xc, int yc, int r, int dir, int color) {
   reflect_dots(xc, yc, dir * x, dir * y, color);
 
   while (y >= x) {
-
     if (d > 0) {
       y--;
       d = d + 4 * (x - y) + 10;
