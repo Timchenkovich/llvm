@@ -5,9 +5,9 @@ extern "C" {
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm-19/llvm/ADT/ArrayRef.h>
-#include <llvm-19/llvm/IR/BasicBlock.h>
-#include <llvm-19/llvm/IR/DerivedTypes.h>
+#include <llvm/ADT/ArrayRef.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>

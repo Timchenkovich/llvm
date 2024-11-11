@@ -53,9 +53,9 @@ struct generator {
     println("#include <llvm/ExecutionEngine/GenericValue.h>");
     println("#include <llvm/ExecutionEngine/ExecutionEngine.h>");
     println("#include <llvm/Support/TargetSelect.h>");
-    println("#include <llvm-19/llvm/ADT/ArrayRef.h>");
-    println("#include <llvm-19/llvm/IR/BasicBlock.h>");
-    println("#include <llvm-19/llvm/IR/DerivedTypes.h>");
+    println("#include <llvm/ADT/ArrayRef.h>");
+    println("#include <llvm/IR/BasicBlock.h>");
+    println("#include <llvm/IR/DerivedTypes.h>");
     println("#include <llvm/IR/Function.h>");
     println("#include <llvm/IR/IRBuilder.h>");
     println("#include <llvm/IR/LLVMContext.h>");
