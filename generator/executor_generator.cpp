@@ -4,6 +4,7 @@
 #include <format>
 #include <fstream>
 #include <ios>
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -21,6 +22,7 @@ const auto BINARY_INSTR = std::regex("(add|sub|mul|shl|or|and|srem)");
 const auto BINARY_MODS = std::regex("nsw|nuw");
 const auto ICMP_P = std::regex("eq|ne|ugt|uge|ult|ule|sgt|sge|slt|sle");
 const auto FUNC_NAME = std::regex("@[a-zA-Z_]+");
+const auto BOOL = std::regex("true|false");
 
 const auto commaJoin = [](auto acc, const auto& current) {
   if (!acc.empty()) {
@@ -32,9 +34,9 @@ const auto commaJoin = [](auto acc, const auto& current) {
 }  // namespace
 
 struct generator {
-  generator()
-      : input("app.ll", std::ios_base::in),
-        output("executor.cpp", std::ios_base::out) {}
+  generator(const std::string& inputPath, const std::string& outputPath)
+      : input(inputPath, std::ios_base::in),
+        output(outputPath, std::ios_base::out) {}
 
   void indent() { numWs += 2; }
 
@@ -60,6 +62,7 @@ struct generator {
     println("#include <llvm/IR/IRBuilder.h>");
     println("#include <llvm/IR/LLVMContext.h>");
     println("#include <llvm/IR/Module.h>");
+
     println();
     println("using namespace llvm;");
     println();
@@ -80,7 +83,10 @@ struct generator {
   void printSimFuncs() {
     println("Type* intType = Type::getInt32Ty(context);");
 
-    println("ArrayRef<Type*> simPutPixelArgs = {intType, intType, intType};");
+    println(
+        "std::array<Type*, 3> simPutPixelArgsArr = {intType, intType, "
+        "intType};");
+    println("ArrayRef<Type*> simPutPixelArgs = simPutPixelArgsArr;");
     println(
         "FunctionType* simPutPixelType = FunctionType::get(voidType, "
         "simPutPixelArgs, false);");
@@ -122,22 +128,23 @@ struct generator {
     return currentFuncDef.substr(startPos, endPos - startPos);
   }
 
-  std::string getFuncTypes() {
+  std::pair<std::string, size_t> getFuncTypes() {
     size_t argsStart = currentFuncDef.find('(') + 1;
-    size_t argsEnd = currentFuncDef.find(')');
 
-    std::string args = currentFuncDef.substr(argsStart, argsEnd);
+    std::string args = currentFuncDef.substr(argsStart);
     std::vector<std::string> res;
 
     size_t cur_pos = 0;
+    size_t cnt = 0;
     while (true) {
       size_t next_pos = args.find(',', cur_pos);
       if (next_pos == std::string::npos) {
         next_pos = args.find(')', cur_pos);
       }
       if (next_pos == std::string::npos) {
-        return std::accumulate(res.begin(), res.end(), std::string(),
-                               commaJoin);
+        return {
+            std::accumulate(res.begin(), res.end(), std::string(), commaJoin),
+            cnt};
       }
 
       std::string cur_arg = args.substr(cur_pos, next_pos - cur_pos);
@@ -146,6 +153,7 @@ struct generator {
       std::regex_search(cur_arg, match, TYPE);
       if (!match.empty()) {
         res.push_back(getTypeGetter(match.str()));
+        ++cnt;
       }
 
       cur_pos = next_pos + 1;
@@ -156,14 +164,19 @@ struct generator {
     std::string funcName = getFuncName();
 
     std::string funcNameVar = funcName + "FuncName";
+    std::string argsArrVar = funcName + "ArgsArr";
     std::string argsVar = funcName + "Args";
     std::string funcTypeVar = funcName + "FuncType";
     std::string linkageVar = funcName + "Linkage";
     std::string funcVar = funcName + "Func";
-    std::string funcTypes = getFuncTypes();
+    std::pair<std::string, size_t> funcTypesP = getFuncTypes();
+    std::string funcTypes = funcTypesP.first;
+    size_t funcTypesSize = funcTypesP.second;
 
     println(std::format("std::string {} = \"{}\";", funcNameVar, funcName));
-    println(std::format("ArrayRef<Type*> {} = {{{}}};", argsVar, funcTypes));
+    println(std::format("std::array<Type*, {}> {} = {{{}}};", funcTypesSize,
+                        argsArrVar, funcTypes));
+    println(std::format("ArrayRef<Type*> {} = {};", argsVar, argsArrVar));
     println(std::format(
         "FunctionType* {} = FunctionType::get(voidType, {}, false);",
         funcTypeVar, argsVar));
@@ -262,7 +275,8 @@ struct generator {
     std::smatch match;
     if (std::regex_search(input, match, VAR)) {
       return "val" + match.str().substr(1);
-    } else if (std::regex_search(input, match, NUM)) {
+    } else if (std::regex_search(input, match, NUM) ||
+               std::regex_search(input, match, BOOL)) {
       return std::format("{}({})", getConstantGetter(type), match.str());
     }
 
@@ -320,7 +334,7 @@ struct generator {
     }
 
     if (type == "ptr") {
-      return "Type::getInt64Ty(context)->getPointerTo()";
+      return "PointerType::get(context, 0)";
     }
 
     if (type == "i1") {
@@ -771,8 +785,15 @@ struct generator {
   size_t cur = 0;
 };
 
-int main() {
-  generator gen;
+int main(int argc, char** argv) {
+  if (argc != 3) {
+    std::cerr << "Expected <LL-file> <output-file> arguments provided.";
+    return 1;
+  }
+
+  std::string input = argv[1];
+  std::string output = argv[2];
+  generator gen{input, output};
   gen.generate();
   return 0;
 }

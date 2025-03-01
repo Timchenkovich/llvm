@@ -161,7 +161,7 @@ int main() {
   }
 
   auto roots_str = std::accumulate(roots.begin(), roots.end(), std::string(),
-                                   [](std::string &acc, Node *cur) {
+                                   [](std::string acc, Node *cur) {
                                      auto addr_str = std::to_string(cur->addr);
                                      if (acc.empty()) {
                                        return addr_str;
