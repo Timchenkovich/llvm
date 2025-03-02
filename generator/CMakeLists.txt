@@ -22,12 +22,10 @@ add_dependencies(executor makeExecutor)
 llvm_map_components_to_libnames(llvm_libs core executionengine ${LLVM_TARGETS_TO_BUILD})
 target_link_libraries(executor ${llvm_libs} sim)
 
-file(GENERATE OUTPUT generateLL.sh CONTENT "#!/bin/bash\n./executor&\nsleep 10\nkillall executor || true\n")
-
 add_custom_command(
     OUTPUT generated.ll
-    COMMAND chmod u+x generateLL.sh && ./generateLL.sh
-    DEPENDS executor generateLL.sh
+    COMMAND executor --dump
+    DEPENDS executor
 )
 
 add_custom_target(genGeneratedLL DEPENDS generated.ll)
@@ -41,8 +39,8 @@ endif()
 
 add_custom_command(
     OUTPUT generatedApp
-    COMMAND ${LL_COMPILER} ${CMAKE_CURRENT_BINARY_DIR}/generated.ll -o compiledLL.s -mtriple=${LLVM_HOST_TRIPLE} 
-    && ${CMAKE_CXX_COMPILER} compiledLL.s -c -o generatedApp
+    COMMAND ${LL_COMPILER} ${CMAKE_CURRENT_BINARY_DIR}/generated.ll -o compiledLL.s -mtriple=${LLVM_HOST_TRIPLE}
+    && ${CMAKE_CXX_COMPILER} compiledLL.s -c -o generatedApp -target ${LLVM_HOST_TRIPLE}
     DEPENDS genGeneratedLL generated.ll
 )
 

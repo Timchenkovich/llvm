@@ -62,12 +62,36 @@ struct generator {
     println("#include <llvm/IR/IRBuilder.h>");
     println("#include <llvm/IR/LLVMContext.h>");
     println("#include <llvm/IR/Module.h>");
+    println("#include <iostream>");
 
     println();
     println("using namespace llvm;");
     println();
-    println("int main() {");
+    println("int main(int argc, char** argv) {");
     indent();
+
+    println("if (argc > 2) {");
+    indent();
+    println(
+        "std::cerr << \"Unexpected number of args, usage: executor "
+        "[--dump].\" << std::endl;");
+    println("return 1;");
+    outdent();
+    println("}");
+    println();
+
+    println("bool dumpOnly = false;");
+    println("if (argc == 2) {");
+    indent();
+    println("std::string text = argv[1];");
+    println(
+        "if (text != \"--dump\") { std::cerr << \"Unexpected key.\" << "
+        "std::endl; return 1; }");
+    println("dumpOnly = true;");
+    outdent();
+    println("}");
+    println();
+
     println("LLVMContext context;");
     println(
         "std::unique_ptr<Module> module = "
@@ -723,11 +747,21 @@ struct generator {
     println("InitializeNativeTarget();");
     println("InitializeNativeTargetAsmPrinter();");
     println();
+
+    println("if (dumpOnly) {");
+    indent();
     println("std::error_code ec;");
     println("raw_fd_stream debugOut(\"generated.ll\", ec);");
     println("module->print(debugOut, nullptr);");
     println("debugOut.close();");
+    println("return 0;");
+    outdent();
+    println("}");
+
     println("ExecutionEngine* ee = EngineBuilder(std::move(module)).create();");
+    println(
+        "if (!ee) { std::cerr << \"Failed creating execution engine.\" << "
+        "std::endl; return 1; }");
     println(
         "ee->InstallLazyFunctionCreator([=](const std::string& fn) -> void* {");
     std::array<std::string, 3> fnNames = {"simPutPixel", "simFlush", "simRand"};

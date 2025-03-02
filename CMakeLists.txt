@@ -29,9 +29,9 @@ add_definitions(${LLVM_DEFINITIONS_LIST})
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-# add_subdirectory(sdl EXCLUDE_FROM_ALL)
-# set(SDL2_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/external/SDL/include)
-# set(SDL2_PATH ${CMAKE_CURRENT_BINARY_DIR})
+message("Target cpu: ${CMAKE_SYSTEM_PROCESSOR}")
+message("Host cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+
 
 add_subdirectory(sim)
 add_subdirectory(app)
