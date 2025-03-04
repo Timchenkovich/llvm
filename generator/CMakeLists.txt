@@ -3,6 +3,7 @@ project(compilers)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_executable(executorGenerator executor_generator.cpp)
+target_link_libraries(executorGenerator sourceCreator)
 add_dependencies(executorGenerator makeLL)
 
 add_custom_command(
@@ -13,13 +14,13 @@ add_custom_command(
 
 add_custom_target(makeExecutor DEPENDS executor.cpp)
 
-include_directories(${LLVM_INCLUDE_DIRS} ../sim)
+include_directories(${LLVM_INCLUDE_DIRS} ../sim ../source-creator)
 
 add_executable(executor executor.cpp)
 add_dependencies(executor makeExecutor)
 
 
-llvm_map_components_to_libnames(llvm_libs core executionengine ${LLVM_TARGETS_TO_BUILD})
+llvm_map_components_to_libnames(llvm_libs core executionengine mcjit ${LLVM_TARGETS_TO_BUILD})
 target_link_libraries(executor ${llvm_libs} sim)
 
 add_custom_command(

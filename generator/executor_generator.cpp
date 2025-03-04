@@ -1,3 +1,5 @@
+#include <sourceCreator.h>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -35,111 +37,103 @@ const auto commaJoin = [](auto acc, const auto& current) {
 
 struct generator {
   generator(const std::string& inputPath, const std::string& outputPath)
-      : input(inputPath, std::ios_base::in),
-        output(outputPath, std::ios_base::out) {}
-
-  void indent() { numWs += 2; }
-
-  void outdent() { numWs -= 2; }
-
-  void println(const std::string& text = "") {
-    std::string ws(numWs, ' ');
-    output << ws << text << '\n';
-  }
+      : input(inputPath, std::ios_base::in), sourceCreator_(outputPath) {}
 
   void generatePreamble() {
-    println("extern \"C\" {");
-    println(" #include \"../sim/sim.h\"");
-    println("}");
-    println("#include <fstream>");
-    println("#include <llvm/ExecutionEngine/GenericValue.h>");
-    println("#include <llvm/ExecutionEngine/ExecutionEngine.h>");
-    println("#include <llvm/Support/TargetSelect.h>");
-    println("#include <llvm/ADT/ArrayRef.h>");
-    println("#include <llvm/IR/BasicBlock.h>");
-    println("#include <llvm/IR/DerivedTypes.h>");
-    println("#include <llvm/IR/Function.h>");
-    println("#include <llvm/IR/IRBuilder.h>");
-    println("#include <llvm/IR/LLVMContext.h>");
-    println("#include <llvm/IR/Module.h>");
-    println("#include <iostream>");
+    sourceCreator_.println("extern \"C\" {");
+    sourceCreator_.println(" #include \"../sim/sim.h\"");
+    sourceCreator_.println("}");
+    sourceCreator_.println("#include <fstream>");
+    sourceCreator_.println("#include <llvm/ExecutionEngine/GenericValue.h>");
+    sourceCreator_.println("#include <llvm/ExecutionEngine/ExecutionEngine.h>");
+    sourceCreator_.println("#include <llvm/ExecutionEngine/MCJIT.h>");
+    sourceCreator_.println("#include <llvm/Support/TargetSelect.h>");
+    sourceCreator_.println("#include <llvm/ADT/ArrayRef.h>");
+    sourceCreator_.println("#include <llvm/IR/BasicBlock.h>");
+    sourceCreator_.println("#include <llvm/IR/DerivedTypes.h>");
+    sourceCreator_.println("#include <llvm/IR/Function.h>");
+    sourceCreator_.println("#include <llvm/IR/IRBuilder.h>");
+    sourceCreator_.println("#include <llvm/IR/LLVMContext.h>");
+    sourceCreator_.println("#include <llvm/IR/Module.h>");
+    sourceCreator_.println("#include <iostream>");
 
-    println();
-    println("using namespace llvm;");
-    println();
-    println("int main(int argc, char** argv) {");
-    indent();
+    sourceCreator_.println();
+    sourceCreator_.println("using namespace llvm;");
+    sourceCreator_.println();
+    sourceCreator_.println("int main(int argc, char** argv) {");
+    sourceCreator_.indent();
 
-    println("if (argc > 2) {");
-    indent();
-    println(
+    sourceCreator_.println("if (argc > 2) {");
+    sourceCreator_.indent();
+    sourceCreator_.println(
         "std::cerr << \"Unexpected number of args, usage: executor "
         "[--dump].\" << std::endl;");
-    println("return 1;");
-    outdent();
-    println("}");
-    println();
+    sourceCreator_.println("return 1;");
+    sourceCreator_.outdent();
+    sourceCreator_.println("}");
+    sourceCreator_.println();
 
-    println("bool dumpOnly = false;");
-    println("if (argc == 2) {");
-    indent();
-    println("std::string text = argv[1];");
-    println(
+    sourceCreator_.println("bool dumpOnly = false;");
+    sourceCreator_.println("if (argc == 2) {");
+    sourceCreator_.indent();
+    sourceCreator_.println("std::string text = argv[1];");
+    sourceCreator_.println(
         "if (text != \"--dump\") { std::cerr << \"Unexpected key.\" << "
         "std::endl; return 1; }");
-    println("dumpOnly = true;");
-    outdent();
-    println("}");
-    println();
+    sourceCreator_.println("dumpOnly = true;");
+    sourceCreator_.outdent();
+    sourceCreator_.println("}");
+    sourceCreator_.println();
 
-    println("LLVMContext context;");
-    println(
+    sourceCreator_.println("LLVMContext context;");
+    sourceCreator_.println(
         "std::unique_ptr<Module> module = "
         "std::make_unique<Module>(\"generated\", "
         "context);");
-    println("IRBuilder<> builder(context);");
-    println("Type* voidType = Type::getVoidTy(context);");
-    println();
+    sourceCreator_.println("IRBuilder<> builder(context);");
+    sourceCreator_.println("Type* voidType = Type::getVoidTy(context);");
+    sourceCreator_.println();
 
     printSimFuncs();
   }
 
   void printSimFuncs() {
-    println("Type* intType = Type::getInt32Ty(context);");
+    sourceCreator_.println("Type* intType = Type::getInt32Ty(context);");
 
-    println(
+    sourceCreator_.println(
         "std::array<Type*, 3> simPutPixelArgsArr = {intType, intType, "
         "intType};");
-    println("ArrayRef<Type*> simPutPixelArgs = simPutPixelArgsArr;");
-    println(
+    sourceCreator_.println(
+        "ArrayRef<Type*> simPutPixelArgs = simPutPixelArgsArr;");
+    sourceCreator_.println(
         "FunctionType* simPutPixelType = FunctionType::get(voidType, "
         "simPutPixelArgs, false);");
-    println(
+    sourceCreator_.println(
         "FunctionCallee simPutPixelFunc = "
         "module->getOrInsertFunction(\"simPutPixel\", simPutPixelType);");
-    println();
+    sourceCreator_.println();
 
-    println(
+    sourceCreator_.println(
         "FunctionType* simFlushType = FunctionType::get(voidType, "
         "false);");
-    println(
+    sourceCreator_.println(
         "FunctionCallee simFlushFunc = "
         "module->getOrInsertFunction(\"simFlush\", simFlushType);");
-    println();
+    sourceCreator_.println();
 
-    println(
+    sourceCreator_.println(
         "FunctionType* simRandType = FunctionType::get(intType, "
         "false);");
-    println(
+    sourceCreator_.println(
         "FunctionCallee simRandFunc = "
         "module->getOrInsertFunction(\"simRand\", simRandType);");
-    println();
+    sourceCreator_.println();
   }
 
   void generateExit() {
-    println("return 0;");
-    outdent();
-    println("}");
+    sourceCreator_.println("return 0;");
+    sourceCreator_.outdent();
+    sourceCreator_.println("}");
   }
 
   size_t getParamCount() {
@@ -197,20 +191,23 @@ struct generator {
     std::string funcTypes = funcTypesP.first;
     size_t funcTypesSize = funcTypesP.second;
 
-    println(std::format("std::string {} = \"{}\";", funcNameVar, funcName));
-    println(std::format("std::array<Type*, {}> {} = {{{}}};", funcTypesSize,
-                        argsArrVar, funcTypes));
-    println(std::format("ArrayRef<Type*> {} = {};", argsVar, argsArrVar));
-    println(std::format(
+    sourceCreator_.println(
+        std::format("std::string {} = \"{}\";", funcNameVar, funcName));
+    sourceCreator_.println(std::format("std::array<Type*, {}> {} = {{{}}};",
+                                       funcTypesSize, argsArrVar, funcTypes));
+    sourceCreator_.println(
+        std::format("ArrayRef<Type*> {} = {};", argsVar, argsArrVar));
+    sourceCreator_.println(std::format(
         "FunctionType* {} = FunctionType::get(voidType, {}, false);",
         funcTypeVar, argsVar));
-    println(std::format("Function::LinkageTypes {} = {};", linkageVar,
-                        funcName == "app" ? "Function::ExternalLinkage"
-                                          : "Function::InternalLinkage"));
-    println(std::format(
+    sourceCreator_.println(
+        std::format("Function::LinkageTypes {} = {};", linkageVar,
+                    funcName == "app" ? "Function::ExternalLinkage"
+                                      : "Function::InternalLinkage"));
+    sourceCreator_.println(std::format(
         "Function* {} = Function::Create({}, {}, {}, module.get());", funcVar,
         funcTypeVar, linkageVar, funcNameVar));
-    println();
+    sourceCreator_.println();
   }
 
   void createBasicBlocks() {
@@ -219,7 +216,7 @@ struct generator {
     std::string funcVar = funcName + "Func";
 
     auto doCreate = [this, &funcVar](size_t num) {
-      println(std::format(
+      sourceCreator_.println(std::format(
           "BasicBlock* bb{} = BasicBlock::Create(context, \"\", {});", num,
           funcVar));
     };
@@ -234,7 +231,7 @@ struct generator {
       doCreate(blockNum);
     }
 
-    println();
+    sourceCreator_.println();
   }
 
   void createBr(const std::string& instr) {
@@ -249,7 +246,7 @@ struct generator {
       std::regex_search(rest, match, NUM);
 
       std::string bbNum = match.str();
-      println(std::format("builder.CreateBr(bb{});", bbNum));
+      sourceCreator_.println(std::format("builder.CreateBr(bb{});", bbNum));
 
       return;
     }
@@ -265,7 +262,7 @@ struct generator {
     std::string bb1 = match.str();
     rest = match.suffix();
 
-    println(
+    sourceCreator_.println(
         std::format("builder.CreateCondBr(val{}, bb{}, bb{});", val, bb0, bb1));
   }
 
@@ -277,10 +274,10 @@ struct generator {
   }
 
   void changeInsertPoint(size_t num) {
-    println(std::format("builder.SetInsertPoint(bb{});", num));
+    sourceCreator_.println(std::format("builder.SetInsertPoint(bb{});", num));
   }
 
-  void createRet() { println("builder.CreateRetVoid();"); }
+  void createRet() { sourceCreator_.println("builder.CreateRetVoid();"); }
 
   std::string getConstantGetter(const std::string& type) {
     if (type == "i32") {
@@ -338,15 +335,16 @@ struct generator {
           std::format("val{}->addIncoming({}, {});", resNum, value, bb));
     }
 
-    println(std::format("PHINode* val{} = builder.CreatePHI({}, {});", resNum,
-                        typeGetter, incomingStrs.size()));
+    sourceCreator_.println(
+        std::format("PHINode* val{} = builder.CreatePHI({}, {});", resNum,
+                    typeGetter, incomingStrs.size()));
     incomings.insert(incomings.end(), std::move_iterator(incomingStrs.begin()),
                      std::move_iterator(incomingStrs.end()));
   }
 
   void dumpIncomings() {
     for (const auto& incoming : incomings) {
-      println(incoming);
+      sourceCreator_.println(incoming);
     }
 
     incomings.clear();
@@ -422,11 +420,13 @@ struct generator {
     }
 
     if (hasNsw || hasNuw) {
-      println(std::format("Value* val{} = builder.{}({}, {}, \"\", {}, {});",
-                          valNum, creator, vals[0], vals[1], hasNuw, hasNsw));
+      sourceCreator_.println(
+          std::format("Value* val{} = builder.{}({}, {}, \"\", {}, {});",
+                      valNum, creator, vals[0], vals[1], hasNuw, hasNsw));
     } else {
-      println(std::format("Value* val{} = builder.{}({}, {}, \"\");", valNum,
-                          creator, vals[0], vals[1]));
+      sourceCreator_.println(
+          std::format("Value* val{} = builder.{}({}, {}, \"\");", valNum,
+                      creator, vals[0], vals[1]));
     }
   }
 
@@ -444,7 +444,8 @@ struct generator {
     std::string val = getVarRefOrConstant(first, type);
     std::string ptr = getVarRefOrConstant(second, "ptr");
 
-    println(std::format("builder.CreateStore({}, {});", val, ptr));
+    sourceCreator_.println(
+        std::format("builder.CreateStore({}, {});", val, ptr));
   }
 
   std::string getPredicate(std::string pred) {
@@ -478,8 +479,9 @@ struct generator {
 
     std::string left = getVarRefOrConstant(first, type);
     std::string right = getVarRefOrConstant(second, type);
-    println(std::format("Value* val{} = builder.CreateICmp({}, {}, {});", num,
-                        convPred, left, right));
+    sourceCreator_.println(
+        std::format("Value* val{} = builder.CreateICmp({}, {}, {});", num,
+                    convPred, left, right));
   }
 
   void createLoad(const std::string& line) {
@@ -495,8 +497,9 @@ struct generator {
     rest = match.suffix();
 
     std::string ptr = getVarRefOrConstant(rest, "ptr");
-    println(std::format("Value* val{} = builder.CreateLoad({}, {});", num,
-                        getTypeGetter(type), ptr));
+    sourceCreator_.println(
+        std::format("Value* val{} = builder.CreateLoad({}, {});", num,
+                    getTypeGetter(type), ptr));
   }
 
   void createTailCall(const std::string& line) {
@@ -533,20 +536,23 @@ struct generator {
     std::string argsFolded =
         std::accumulate(args.begin(), args.end(), std::string(), commaJoin);
 
-    // println("ArrayRef<Value*> args{} = {{{}}};", )
+    // sourceCreator_.println("ArrayRef<Value*> args{} = {{{}}};", )
     if (assignee.empty()) {
-      println("{");
-      indent();
+      sourceCreator_.println("{");
+      sourceCreator_.indent();
 
-      println(std::format("CallInst* call = builder.CreateCall({}, {{{}}});",
-                          funcName + "Func", argsFolded));
-      println("call->setTailCall(true);");
-      outdent();
-      println("}");
+      sourceCreator_.println(
+          std::format("CallInst* call = builder.CreateCall({}, {{{}}});",
+                      funcName + "Func", argsFolded));
+      sourceCreator_.println("call->setTailCall(true);");
+      sourceCreator_.outdent();
+      sourceCreator_.println("}");
     } else {
-      println(std::format("CallInst* val{} = builder.CreateCall({}, {{{}}});",
-                          assignee, funcName + "Func", argsFolded));
-      println(std::format("val{}->setTailCall(true);", assignee));
+      sourceCreator_.println(
+          std::format("CallInst* val{} = builder.CreateCall({}, {{{}}});",
+                      assignee, funcName + "Func", argsFolded));
+      sourceCreator_.println(
+          std::format("val{}->setTailCall(true);", assignee));
     }
   }
 
@@ -575,8 +581,8 @@ struct generator {
 
     std::string argsJoined =
         std::accumulate(args.begin(), args.end(), std::string(), commaJoin);
-    println(std::format("Value* val{} = builder.CreateSelect({});", num,
-                        argsJoined));
+    sourceCreator_.println(std::format(
+        "Value* val{} = builder.CreateSelect({});", num, argsJoined));
   }
 
   void createSwitch(const std::vector<std::string>& lines) {
@@ -615,7 +621,7 @@ struct generator {
                                      constant, label));
     }
 
-    println(
+    sourceCreator_.println(
         std::format("SwitchInst* sw{} = builder.CreateSwitch(val{}, bb{}, {});",
                     numSwitches, val, bb, curCases.size()));
 
@@ -694,21 +700,21 @@ struct generator {
       }
     }
 
-    println();
+    sourceCreator_.println();
   }
 
   void printArgs() {
     size_t argc = getParamCount();
     std::string funcName = getFuncName();
     for (size_t i = 0; i < argc; ++i) {
-      println(std::format("Value* val{} = {}Func->args().begin() + {};", i,
-                          funcName, i));
+      sourceCreator_.println(std::format(
+          "Value* val{} = {}Func->args().begin() + {};", i, funcName, i));
     }
   }
 
   void dumpCases() {
     for (const auto& cs : cases) {
-      println(cs);
+      sourceCreator_.println(cs);
     }
 
     numSwitches = 0;
@@ -716,9 +722,10 @@ struct generator {
   }
 
   void generateFun() {
-    println(std::format("// defining {} function", getFuncName()));
-    println("{");
-    indent();
+    sourceCreator_.println(
+        std::format("// defining {} function", getFuncName()));
+    sourceCreator_.println("{");
+    sourceCreator_.indent();
 
     createBasicBlocks();
     printArgs();
@@ -726,9 +733,9 @@ struct generator {
     dumpIncomings();
     dumpCases();
 
-    outdent();
-    println("}");
-    println();
+    sourceCreator_.outdent();
+    sourceCreator_.println("}");
+    sourceCreator_.println();
   }
 
   void readFunc() {
@@ -744,40 +751,41 @@ struct generator {
   }
 
   void generateExecutor() {
-    println("InitializeNativeTarget();");
-    println("InitializeNativeTargetAsmPrinter();");
-    println();
+    sourceCreator_.println("InitializeNativeTarget();");
+    sourceCreator_.println("InitializeNativeTargetAsmPrinter();");
+    sourceCreator_.println();
 
-    println("if (dumpOnly) {");
-    indent();
-    println("std::error_code ec;");
-    println("raw_fd_stream debugOut(\"generated.ll\", ec);");
-    println("module->print(debugOut, nullptr);");
-    println("debugOut.close();");
-    println("return 0;");
-    outdent();
-    println("}");
+    sourceCreator_.println("if (dumpOnly) {");
+    sourceCreator_.indent();
+    sourceCreator_.println("std::error_code ec;");
+    sourceCreator_.println("raw_fd_stream debugOut(\"generated.ll\", ec);");
+    sourceCreator_.println("module->print(debugOut, nullptr);");
+    sourceCreator_.println("debugOut.close();");
+    sourceCreator_.println("return 0;");
+    sourceCreator_.outdent();
+    sourceCreator_.println("}");
 
-    println("ExecutionEngine* ee = EngineBuilder(std::move(module)).create();");
-    println(
+    sourceCreator_.println(
+        "ExecutionEngine* ee = EngineBuilder(std::move(module)).create();");
+    sourceCreator_.println(
         "if (!ee) { std::cerr << \"Failed creating execution engine.\" << "
         "std::endl; return 1; }");
-    println(
+    sourceCreator_.println(
         "ee->InstallLazyFunctionCreator([=](const std::string& fn) -> void* {");
     std::array<std::string, 3> fnNames = {"simPutPixel", "simFlush", "simRand"};
     for (size_t i = 0; i < 3; ++i) {
-      println(std::format(" if (fn == \"{}\") {{", fnNames[i]));
-      println(
+      sourceCreator_.println(std::format(" if (fn == \"{}\") {{", fnNames[i]));
+      sourceCreator_.println(
           std::format("   return reinterpret_cast<void*>({});", fnNames[i]));
-      println(" }");
+      sourceCreator_.println(" }");
     }
-    println(" return nullptr;");
-    println("});");
-    println("ee->finalizeObject();");
-    println();
-    println("simInit();");
-    println("GenericValue res = ee->runFunction(appFunc, {});");
-    println("simExit();");
+    sourceCreator_.println(" return nullptr;");
+    sourceCreator_.println("});");
+    sourceCreator_.println("ee->finalizeObject();");
+    sourceCreator_.println();
+    sourceCreator_.println("simInit();");
+    sourceCreator_.println("GenericValue res = ee->runFunction(appFunc, {});");
+    sourceCreator_.println("simExit();");
   }
 
   void generate() {
@@ -813,9 +821,8 @@ struct generator {
   std::vector<std::string> incomings;
   std::string currentFuncDef;
   std::vector<std::string> currentBody;
-  size_t numWs = 0;
   std::ifstream input;
-  std::ofstream output;
+  sourceCreator sourceCreator_;
   size_t cur = 0;
 };
 
