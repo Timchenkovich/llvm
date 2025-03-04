@@ -1,4 +1,4 @@
-draw_half_circle:
+fun draw_half_circle:
     ; x9 - x, x10 - y, x14 - r, x11 - dir, x2 - color
     muladd x15, x14, x11, x10
     putpxl x9, x15, x2
@@ -49,7 +49,7 @@ draw:
     cj x19, loop
     ret
 
-main:
+fun main:
     rndrng x0, 449
     rndrng x1, 193
     rnd x2
@@ -63,8 +63,8 @@ main:
 label22:
 label27:
     putpxl x6, x7, x8
-    incbneq x6, 512, label27
-    incbneq x7, 256, label22
+    incjneq x6, 512, label27
+    incjneq x7, 256, label22
 
     add x9, x0, 30
     add x10, x1, 30

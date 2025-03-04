@@ -1,0 +1,6 @@
+project(compilers)
+
+include_directories(..)
+
+add_library(translatingInstructionCreator translatingInstructionCreator.cpp)
+target_link_libraries(translatingInstructionCreator PRIVATE branchInstructionCreator)
