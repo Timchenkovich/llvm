@@ -73,13 +73,14 @@ add_subdirectory(instruction-creator)
 
 
 
-add_library(emulatorGenerator ${asm_ISA_SOURCES})
+add_library(emulatorGenerated ${asm_ISA_SOURCES})
 
 llvm_map_components_to_libnames(llvm_libs core executionengine mcjit ${LLVM_TARGETS_TO_BUILD})
 # this will also bring includes
-target_link_libraries(emulatorGenerator instructionCreator ${llvm_libs})
+target_link_libraries(emulatorGenerated instructionCreator ${llvm_libs})
 
 add_library(emulatorImpl emulatorImpl.cpp)
+target_link_libraries(emulatorImpl emulatorGenerated)
 
 add_executable(lift lift.cpp)
 target_link_libraries(lift 
@@ -90,5 +91,5 @@ funcCreator
 instructionCreator 
 cxxopts 
 sim 
-emulatorGenerator 
+emulatorGenerated 
 emulatorImpl)
