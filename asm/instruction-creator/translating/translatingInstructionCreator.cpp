@@ -1,7 +1,5 @@
 #include "translatingInstructionCreator.h"
 
-#include <sys/_types/_size_t.h>
-
 #include "llvm/IR/InstrTypes.h"
 #include "moduleContext.h"
 #include "utils.h"
