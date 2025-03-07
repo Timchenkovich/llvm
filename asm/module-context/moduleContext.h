@@ -7,7 +7,9 @@
 
 class moduleContext {
  public:
-  moduleContext(const std::string& moduleId, size_t regFileSize);
+  moduleContext(const std::string& moduleId, llvm::GlobalVariable& regFile,
+                llvm::LLVMContext& ctx, llvm::IRBuilder<>& builder,
+                llvm::Module& module, size_t regFileSize);
 
  public:
   llvm::Module& getModule();
@@ -23,12 +25,12 @@ class moduleContext {
   llvm::FunctionType* getFunType();
 
  private:
-  llvm::Module module_;
-  llvm::LLVMContext ctx_;
-  llvm::IRBuilder<> builder_;
+  llvm::LLVMContext& ctx_;
+  llvm::IRBuilder<>& builder_;
+  llvm::Module& module_;
 
   std::unordered_map<std::string, llvm::FunctionCallee> nameToCallee_;
 
-  llvm::GlobalVariable regFile_;
+  llvm::GlobalVariable& regFile_;
   size_t regFileSize_;
 };

@@ -20,13 +20,10 @@ std::any funcCreator::visitFunction(asmParser::FunctionContext* ctx) {
 }
 
 std::any funcCreator::visitLabel(asmParser::LabelContext* ctx) {
-  assert(!lastFun_.empty() && !lastBB_.empty());
-  auto label = ctx->ID()->getText();
+  assert(!lastFun_.empty());
 
-  if (metBranch_) {
-    metBranch_ = false;
-    desc_.getDescriptor(lastFun_).addBB(label);
-  }
+  metBranch_ = false;
+  auto label = ctx->ID()->getText();
 
   funDescriptor& des = desc_.getDescriptor(lastFun_);
 
@@ -37,7 +34,7 @@ std::any funcCreator::visitLabel(asmParser::LabelContext* ctx) {
 };
 
 std::any funcCreator::visitBranch(asmParser::BranchContext* ctx) {
-  assert(!lastFun_.empty() && !lastBB_.empty());
+  assert(!lastFun_.empty());
 
   metBranch_ = true;
   return defaultResult();

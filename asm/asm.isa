@@ -1,0 +1,19 @@
+add reg rim rim
+sub reg rim rim
+shl reg reg imm
+cmpgt reg rim rim
+cmpgte reg rim rim
+cmplt reg rim rim
+cmpneq reg rim rim
+or reg rim rim
+and reg rim rim
+slctev reg reg rim rim
+mul reg rim rim
+muladd reg reg rim rim
+mov reg rim
+select reg reg rim rim
+
+flush
+rnd reg
+putpxl rim rim rim
+rndrng reg imm

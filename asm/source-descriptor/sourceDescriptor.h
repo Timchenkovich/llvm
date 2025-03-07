@@ -39,7 +39,7 @@ class funDescriptor {
   std::unordered_map<std::string, size_t> labelToIdx_;
   std::vector<std::string> idxToLabel_;
 
-  size_t counter_;
+  size_t counter_ = 0;
 };
 
 class sourceDescriptor {

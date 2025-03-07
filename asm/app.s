@@ -15,7 +15,7 @@ fun draw_half_circle:
     cj x15, skip_ret
     ret
 skip_ret:
-    shl x15, r, 1
+    shl x15, x14, 1
     sub x15, 3, x15 
     ; x15 is d
 
@@ -91,7 +91,7 @@ label27:
 
     add x10, x1, 33
     call draw_half_circle
-    move x11, 1
+    mov x11, 1
     call draw_half_circle
 
     add x9, x0, 63
@@ -99,13 +99,13 @@ label27:
     cmplt x13, x0, 3
     or x12, x12, x13
     sub x13, 0, x3
-    select x3, x13, x3
+    select x3, x3, x13, x3
     cmplt x12, x1, 3
     add x10, x1, 63
     cmpgt x13, x10, 255
     or x12, x12, x13
     sub x13, 0, x5
-    select x5, x13, x5
+    select x5, x5, x13, x5
 
     muladd x0, x3, 3, x0
     muladd x1, x5, 3, x1

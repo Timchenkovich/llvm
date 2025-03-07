@@ -45,10 +45,15 @@ find_package(ANTLR REQUIRED)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-message("Target cpu: ${CMAKE_SYSTEM_PROCESSOR}")
-message("Host cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
-message("mac arch is ${CMAKE_OSX_ARCHITECTURE}")
+
+FetchContent_Declare(
+    opts
+    GIT_REPOSITORY git@github.com:jarro2783/cxxopts.git
+    GIT_TAG v3.2.0
+)
+FetchContent_MakeAvailable(opts)
+
 
 add_subdirectory(source-creator)
 add_subdirectory(sim)

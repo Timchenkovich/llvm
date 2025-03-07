@@ -1,17 +1,19 @@
 #include "moduleContext.h"
 
-#include "llvm/IR/Constants.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/Module.h"
 
 using namespace llvm;
 
-moduleContext::moduleContext(const std::string& moduleId, size_t regFileSize)
-    : module_(moduleId, ctx_),
-      builder_(ctx_),
-      regFile_(module_, ArrayType::get(Type::getInt64Ty(ctx_), regFileSize),
-               false, llvm::GlobalValue::InternalLinkage,
-               ConstantAggregateZero::get(Type::getInt64Ty(ctx_))),
+moduleContext::moduleContext(const std::string& moduleId,
+                             llvm::GlobalVariable& regFile,
+                             llvm::LLVMContext& ctx, llvm::IRBuilder<>& builder,
+                             llvm::Module& module, size_t regFileSize)
+    : ctx_(ctx),
+      builder_(builder),
+      module_(module),
+      regFile_(regFile),
       regFileSize_(regFileSize) {}
 
 void moduleContext::addExternalFun(FunctionType* type,
