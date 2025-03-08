@@ -7,7 +7,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(BootstrapIsa)
 
 bootstrap_isa(${CMAKE_CURRENT_SOURCE_DIR}/asm.isa)
-set(ASM_INCLUDE_DIRS ${asm_GENERATED_DIR})
+set(ASM_GENERATED_INCLUDE_DIR ${asm_GENERATED_DIR})
 
 include_directories(
     module-context 
@@ -15,30 +15,30 @@ include_directories(
     func-creator
     source-descriptor
     ${SIM_PATH}
-    ${ASM_INCLUDE_DIRS}
+    ${ASM_GENERATED_INCLUDE_DIR}
 )
 
 # once instruction grammars are generated, initialize antlr generator chain
 antlr_target(
-    IsaLexer
+    IsaInstructionsLexer
     ${asm_INSTRUCTION_LEXER}
     LEXER
     OUTPUT_DIRECTORY ${asm_GENERATED_DIR}
-    DEPENDS generateInstructionGrammar ${asm_GRAMMAR_SOURCES} 
+    DEPENDS generateInstructionsGrammar ${asm_GRAMMAR_SOURCES} 
 )
 
 antlr_target(
     AsmLexer
     ${CMAKE_CURRENT_SOURCE_DIR}/asmLexer.g4
     LEXER
-    DEPENDS_ANTLR IsaLexer
+    DEPENDS_ANTLR IsaInstructionsLexer
     OUTPUT_DIRECTORY ${asm_GENERATED_DIR}
     COMPILE_FLAGS -lib ${asm_GENERATED_DIR}
 )
 
 
 antlr_target( 
-    IsaParser
+    IsaInstructionsParser
     ${asm_INSTRUCTION_PARSER}
     PARSER
     DEPENDS_ANTLR AsmLexer
@@ -52,7 +52,7 @@ antlr_target(
     PARSER
     LISTENER
     VISITOR
-    DEPENDS_ANTLR IsaParser
+    DEPENDS_ANTLR IsaInstructionsParser
     COMPILE_FLAGS -lib ${asm_GENERATED_DIR}
     OUTPUT_DIRECTORY ${asm_GENERATED_DIR}
 )
