@@ -21,10 +21,10 @@ include_directories(
 # once instruction grammars are generated, initialize antlr generator chain
 antlr_target(
     IsaInstructionsLexer
-    ${asm_INSTRUCTION_LEXER}
+    ${asm_INSTRUCTIONS_LEXER}
     LEXER
     OUTPUT_DIRECTORY ${asm_GENERATED_DIR}
-    DEPENDS generateInstructionsGrammar ${asm_GRAMMAR_SOURCES} 
+    DEPENDS generateInstructionsGrammar ${asm__INSTRUCTIONS_GRAMMAR_SOURCES} 
 )
 
 antlr_target(
@@ -39,7 +39,7 @@ antlr_target(
 
 antlr_target( 
     IsaInstructionsParser
-    ${asm_INSTRUCTION_PARSER}
+    ${asm_INSTRUCTIONS_PARSER}
     PARSER
     DEPENDS_ANTLR AsmLexer
     OUTPUT_DIRECTORY ${asm_GENERATED_DIR}

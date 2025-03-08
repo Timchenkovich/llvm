@@ -25,11 +25,11 @@ macro(bootstrap_isa isaPathStr)
 
 
     add_custom_command(
-    OUTPUT ${${isaName}_GENERATED_SOURCES} ${${isaName}_GRAMMAR_SOURCES}
+    OUTPUT ${${isaName}_GENERATED_SOURCES} ${${isaName}_INSTRUCTIONS_GRAMMAR_SOURCES}
     COMMAND mkdir -p ${outputDir} && cd ${outputDir} && ${CMAKE_BINARY_DIR}/asm/isa-creator/bootstrapIsa ${isaPath}
     DEPENDS ${CMAKE_BINARY_DIR}/asm/isa-creator/bootstrapIsa ${isaPath})
 
-    add_custom_target(generateInstructionGrammar DEPENDS ${${isaName}_INSTRUCTIONS_GRAMMAR_SOURCES})
+    add_custom_target(generateInstructionsGrammar DEPENDS ${${isaName}_INSTRUCTIONS_GRAMMAR_SOURCES})
 
     set(${isaName}_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/${outputDir})
     set(${isaName}_ISA_SOURCES ${${isaName}_GENERATED_SOURCES})
