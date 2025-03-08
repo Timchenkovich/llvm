@@ -110,7 +110,7 @@ std::any branchInstructionCreator::visitBranch(asmParser::BranchContext* ctx) {
 
     int64_t imm = std::stoll(ctx->IMM()->getText());
     Value* cmp = moduleCtx_.getBuilder().CreateICmp(
-        CmpInst::Predicate::ICMP_SLE, getRegisterValue(regIdx),
+        CmpInst::Predicate::ICMP_NE, inc,
         ConstantInt::get(Type::getInt64Ty(moduleCtx_.getContext()), imm));
 
     BasicBlock* nextBB = desc_.getDescriptor(curFun_).getBB(nextLabel.value());

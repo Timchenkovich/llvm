@@ -28,9 +28,6 @@ extern "C" {
 #include "source-descriptor/sourceDescriptor.h"
 
 namespace {
-constexpr size_t REG_FILE_SIZE = 32;
-std::array<int64_t, REG_FILE_SIZE> regs = {0};
-
 constexpr std::string_view ASM_PATH = "asm-path";
 constexpr std::string_view MODE = "mode";
 constexpr std::string_view DUMP_SHORT = "d";
@@ -96,7 +93,7 @@ int main(int argc, char** argv) {
   };
 
   llvm::ArrayType* regFileType =
-      llvm::ArrayType::get(builder.getInt64Ty(), REG_FILE_SIZE);
+      llvm::ArrayType::get(builder.getInt64Ty(), asmEmulator::REGS.size());
   if (emulating) {
     llvmModule->getOrInsertGlobal(REG_FILE_NAME, regFileType);
     regFileHolder = llvmModule->getNamedGlobal(REG_FILE_NAME);
@@ -107,7 +104,7 @@ int main(int argc, char** argv) {
   };
 
   moduleContext ctx("asmGenerated", *std::visit(regFileGetter, regFileHolder),
-                    moduleCtx, builder, *llvmModule, REG_FILE_SIZE);
+                    moduleCtx, builder, *llvmModule, asmEmulator::REGS.size());
 
   asmEmulator::registerFunctions(ctx);
 
@@ -147,17 +144,21 @@ int main(int argc, char** argv) {
   LLVMInitializeNativeTarget();
   LLVMInitializeNativeAsmPrinter();
 
-  llvm::ExecutionEngine* ee =
-      llvm::EngineBuilder(std::move(llvmModule)).create();
+  std::string errorStr;
+
+  llvm::ExecutionEngine* ee = llvm::EngineBuilder(std::move(llvmModule))
+                                  .setErrorStr(&errorStr)
+                                  .create();
   if (!ee) {
-    std::cerr << "Failed creating execution engine." << std::endl;
+    std::cerr << "Failed creating execution engine: " << errorStr << std::endl;
     return 1;
   }
 
   ee->InstallLazyFunctionCreator(asmEmulator::emulatorCaller);
-  ee->finalizeObject();
+  // ee->finalizeObject();
 
-  ee->addGlobalMapping(&ctx.getRegFile(), reinterpret_cast<void*>(regs.data()));
+  ee->addGlobalMapping(&ctx.getRegFile(),
+                       reinterpret_cast<void*>(asmEmulator::REGS.data()));
 
   simInit();
   llvm::GenericValue res =

@@ -2,7 +2,10 @@
 
 std::pair<OpType, int64_t> unpackRegOrImm(asmParser::RegOrImmContext* ctx) {
   if (ctx->IMM()) {
-    return {OpType::IMM, std::stoll(ctx->IMM()->getText())};
+    bool minus = ctx->MINUS();
+    int64_t val = std::stoll(ctx->IMM()->getText());
+    val = minus ? -val : val;
+    return {OpType::IMM, val};
   }
 
   return {OpType::REG, getRegisterIdx(ctx->REG()->getText())};

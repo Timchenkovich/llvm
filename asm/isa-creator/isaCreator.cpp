@@ -108,10 +108,15 @@ void isaCreator::exitInstruction(isaParser::InstructionContext* ctx) {
 }
 
 void isaCreator::generateFunctionCreator(isaParser::IsaContext* ctx) {
-  emulatorSource_.println(std::format("void* {}::{}(const std::string& fn) {{",
+  emulatorSource_.println(std::format("void* {}::{}(std::string_view fn) {{",
                                       getEmulatorNamespace(),
                                       getFunctionCreatorName()));
   emulatorSource_.indent();
+  emulatorSource_.println("#if defined(__APPLE__) && defined(__MACH__)");
+  emulatorSource_.println("// mach o symbols are prefixed with '_'");
+  emulatorSource_.println("fn.remove_prefix(1);");
+  emulatorSource_.println("#endif");
+
   for (auto* instruction : ctx->instruction()) {
     emulatorSource_.println(std::format("if (fn == \"{}\") {{",
                                         instruction->INSTR_NAME()->getText()));
@@ -176,8 +181,8 @@ void isaCreator::generateEmulatorPreamble() {
                                       getRegisterType(), getRegisterCount(),
                                       getRegsVarName()));
 
-  emulatorHeader_.println(std::format("void* {}(const std::string& fn);",
-                                      getFunctionCreatorName()));
+  emulatorHeader_.println(
+      std::format("void* {}(std::string_view fn);", getFunctionCreatorName()));
 
   emulatorHeader_.println(std::format("void {}(moduleContext& module);",
                                       getModuleRegistratorName()));

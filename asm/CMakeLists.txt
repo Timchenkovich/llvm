@@ -75,7 +75,7 @@ add_subdirectory(instruction-creator)
 
 add_library(emulatorGenerated ${asm_ISA_SOURCES})
 
-llvm_map_components_to_libnames(llvm_libs core executionengine mcjit ${LLVM_TARGETS_TO_BUILD})
+llvm_map_components_to_libnames(llvm_libs core executionengine mcjit interpreter ${LLVM_TARGETS_TO_BUILD})
 # this will also bring includes
 target_link_libraries(emulatorGenerated instructionCreator ${llvm_libs})
 
